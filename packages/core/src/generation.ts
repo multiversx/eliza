@@ -543,8 +543,6 @@ export async function generateText({
                     baseURL: endpoint,
                   });
 
-                  console.log({endpoint})
-
                   const { text: portkeyResponse } = await aiGenerateText({
                     model: portkey.chatModel(model),
                     prompt: context,
@@ -562,9 +560,8 @@ export async function generateText({
                     experimental_telemetry: experimental_telemetry,
                 });
 
-                console.log({portkeyResponse})
                 response = portkeyResponse
-            
+
                 console.log("Received response from Portkey.");
                 break;
             }
