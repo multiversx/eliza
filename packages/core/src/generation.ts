@@ -54,6 +54,7 @@ import { fal } from "@fal-ai/client";
 
 import BigNumber from "bignumber.js";
 import { createPublicClient, http } from "viem";
+import { createPortkey } from '@portkey-ai/vercel-provider';
 
 type Tool = CoreTool<any, any>;
 type StepResult = AIStepResult<any>;
@@ -525,6 +526,48 @@ export async function generateText({
         );
 
         switch (provider) {
+            case ModelProviderName.PORTKEY: {
+                elizaLogger.debug("Initializing Portkey");
+
+                const portkeyConfig = {
+                    provider: settings.PORTKEY_MODEL_PROVIDER,
+                    api_key: settings.PORTKEY_PROVIDER_API_KEY,
+                    override_params: {
+                      model: settings.PORTKEY_MODEL,
+                    },
+                  };
+                  
+                const portkey = createPortkey({
+                    apiKey: 'HqSva4vIqmjd4xsszIjoh6FhMPGQ',
+                    config: portkeyConfig,
+                    baseURL: endpoint,
+                  });
+
+                  console.log({endpoint})
+
+                  const { text: portkeyResponse } = await aiGenerateText({
+                    model: portkey.chatModel(model),
+                    prompt: context,
+                    system:
+                        runtime.character.system ??
+                        settings.SYSTEM_PROMPT ??
+                        undefined,
+                    tools: tools,
+                    onStepFinish: onStepFinish,
+                    maxSteps: maxSteps,
+                    temperature: temperature,
+                    maxTokens: max_response_length,
+                    frequencyPenalty: frequency_penalty,
+                    presencePenalty: presence_penalty,
+                    experimental_telemetry: experimental_telemetry,
+                });
+
+                console.log({portkeyResponse})
+                response = portkeyResponse
+            
+                console.log("Received response from Portkey.");
+                break;
+            }
             // OPENAI & LLAMACLOUD shared same structure.
             case ModelProviderName.OPENAI:
             case ModelProviderName.ALI_BAILIAN:
@@ -2171,6 +2214,8 @@ export async function handleProvider(
         //verifiableInferenceOptions,
     } = options;
     switch (provider) {
+        case ModelProviderName.PORTKEY:
+            return await handlePortkey(options);
         case ModelProviderName.OPENAI:
         case ModelProviderName.ETERNALAI:
         case ModelProviderName.ALI_BAILIAN:
@@ -2238,6 +2283,44 @@ async function handleOpenAI({
     const openai = createOpenAI({ apiKey, baseURL });
     return await aiGenerateObject({
         model: openai.languageModel(model),
+        schema,
+        schemaName,
+        schemaDescription,
+        mode,
+        ...modelOptions,
+    });
+}
+
+async function handlePortkey({
+    model,
+    apiKey,
+    schema,
+    schemaName,
+    schemaDescription,
+    mode = "json",
+    modelOptions,
+    runtime,
+}: ProviderOptions): Promise<GenerateObjectResult<unknown>> {
+    elizaLogger.debug("Handling Portkey request");
+    const baseURL = models.portkey.endpoint;
+    elizaLogger.debug("Portkey handlePortkey baseURL:", { baseURL });
+
+    const portkeyConfig = {
+        provider: settings.PORTKEY_MODEL_PROVIDER,
+        api_key: settings.PORTKEY_PROVIDER_API_KEY,
+        override_params: {
+          model: settings.PORTKEY_MODEL,
+        },
+      };
+      
+    const portkey = createPortkey({
+        apiKey: 'HqSva4vIqmjd4xsszIjoh6FhMPGQ',
+        config: portkeyConfig,
+        baseURL,
+      });
+      console.log("GENERATING OBEJCCCT")
+    return await aiGenerateObject({
+        model: portkey.chatModel(model),
         schema,
         schemaName,
         schemaDescription,

@@ -1151,6 +1151,34 @@ export const models: Models = {
             },
         },
     },
+    [ModelProviderName.PORTKEY]: {
+        endpoint: "http://localhost:8787/v1",
+        model: {
+            [ModelClass.SMALL]: {
+                name: settings.PORTKEY_MODEL,
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.0,
+                temperature: 0.6,
+            },
+            [ModelClass.MEDIUM]: {
+                name: settings.PORTKEY_MODEL,
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                temperature: 0.6,
+            },
+            [ModelClass.LARGE]: {
+                name: settings.PORTKEY_MODEL,
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                temperature: 0.6,
+            },
+        },
+    }
 };
 
 export function getModelSettings(

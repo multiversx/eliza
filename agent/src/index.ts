@@ -523,6 +523,11 @@ export function getTokenForProvider(
     character: Character
 ): string | undefined {
     switch (provider) {
+        case ModelProviderName.PORTKEY:
+            return (
+                character.settings?.secrets?.PORTKEY_PROVIDER_API_KEY ||
+                settings.PORTKEY_PROVIDER_API_KEY
+            );
         // no key needed for llama_local, ollama, lmstudio, gaianet or bedrock
         case ModelProviderName.LLAMALOCAL:
             return "";
